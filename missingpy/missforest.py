@@ -9,7 +9,9 @@ from scipy.stats import mode
 
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted, check_array
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from cuml.ensemble import RandomForestClassifier as cuRFClassifier
+from cuml.ensemble import RandomForestRegressor as cuRFRegressor
+
 
 from .pairwise_external import _get_mask
 
@@ -289,22 +291,21 @@ class MissForest(BaseEstimator, TransformerMixin):
                 else self.criterion[0]
 
             # Instantiate regression model
-            rf_regressor = RandomForestRegressor(
+            # Instantiate regression model using cuML's RandomForestRegressor
+            # Instantiate classification model using cuML's RandomForestClassifier
+            rf_classifier = cuRFClassifier(
                 n_estimators=self.n_estimators,
-                criterion=reg_criterion,
                 max_depth=self.max_depth,
                 min_samples_split=self.min_samples_split,
                 min_samples_leaf=self.min_samples_leaf,
-                min_weight_fraction_leaf=self.min_weight_fraction_leaf,
                 max_features=self.max_features,
                 max_leaf_nodes=self.max_leaf_nodes,
                 min_impurity_decrease=self.min_impurity_decrease,
                 bootstrap=self.bootstrap,
-                oob_score=self.oob_score,
-                n_jobs=self.n_jobs,
                 random_state=self.random_state,
                 verbose=self.verbose,
-                warm_start=self.warm_start)
+                warm_start=self.warm_start,
+                class_weight=self.class_weight)
 
         # If needed, repeat for categorical variables
         if self.cat_vars_ is not None:
