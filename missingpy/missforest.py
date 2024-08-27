@@ -293,19 +293,12 @@ class MissForest(BaseEstimator, TransformerMixin):
             # Instantiate regression model
             # Instantiate regression model using cuML's RandomForestRegressor
             # Instantiate classification model using cuML's RandomForestClassifier
-            rf_classifier = cuRFClassifier(
-                n_estimators=self.n_estimators,
-                max_depth=self.max_depth,
-                min_samples_split=self.min_samples_split,
-                min_samples_leaf=self.min_samples_leaf,
-                max_features=self.max_features,
-                max_leaf_nodes=self.max_leaf_nodes,
-                min_impurity_decrease=self.min_impurity_decrease,
-                bootstrap=self.bootstrap,
-                random_state=self.random_state,
-                verbose=self.verbose,
-                warm_start=self.warm_start,
-                class_weight=self.class_weight)
+            # Instantiate regression model
+            rf_regressor = cuRFRegressor(
+                n_estimators=self.n_estimators if self.n_estimators is not None else 100,
+                max_depth=self.max_depth if self.max_depth is not None else 10,
+                min_samples_split=self.min_samples_split if self.min_samples_split is not None else 2
+            )
 
         # If needed, repeat for categorical variables
         if self.cat_vars_ is not None:
@@ -327,23 +320,11 @@ class MissForest(BaseEstimator, TransformerMixin):
                 else self.criterion[1]
 
             # Instantiate classification model
-            rf_classifier = RandomForestClassifier(
-                n_estimators=self.n_estimators,
-                criterion=clf_criterion,
-                max_depth=self.max_depth,
-                min_samples_split=self.min_samples_split,
-                min_samples_leaf=self.min_samples_leaf,
-                min_weight_fraction_leaf=self.min_weight_fraction_leaf,
-                max_features=self.max_features,
-                max_leaf_nodes=self.max_leaf_nodes,
-                min_impurity_decrease=self.min_impurity_decrease,
-                bootstrap=self.bootstrap,
-                oob_score=self.oob_score,
-                n_jobs=self.n_jobs,
-                random_state=self.random_state,
-                verbose=self.verbose,
-                warm_start=self.warm_start,
-                class_weight=self.class_weight)
+            rf_classifier = cuRFClassifier(
+                n_estimators=self.n_estimators if self.n_estimators is not None else 100,
+                max_depth=self.max_depth if self.max_depth is not None else 10,
+                min_samples_split=self.min_samples_split if self.min_samples_split is not None else 2
+            )
 
         # 2. misscount_idx: sorted indices of cols in X based on missing count
         misscount_idx = np.argsort(col_missing_count)
